@@ -1,40 +1,90 @@
-import React from 'react';
-import { FiExternalLink, FiGithub, FiInfo } from 'react-icons/fi';
+import React from "react";
+import { FiExternalLink, FiGithub, FiInfo, FiStar } from "react-icons/fi";
 
 const ProjectCard = ({ project }) => {
+  const hasLive = project.liveLink && project.liveLink !== "#";
+  const hasCode = project.githubLink && project.githubLink !== "#";
+  const hasDetails = project.details;
+
   return (
-    <div className={`project-card ${project.featured ? 'featured' : ''}`}>
-      {project.featured && <span className="featured-badge">Featured</span>}
-      <div className="project-img-wrapper">
-        <img src={project.image} alt={project.title} loading="lazy" />
+    <article className={`prj-card ${project.featured ? "prj-card--featured" : ""}`}>
+      {project.featured && (
+        <span className="prj-card-badge">
+          <FiStar size={11} /> Featured
+        </span>
+      )}
+
+      <div className="prj-card-imgwrap">
+        <img
+          src={project.image}
+          alt={`${project.title} preview`}
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+            e.currentTarget.parentElement.classList.add("prj-card-imgwrap--missing");
+          }}
+        />
+        <span className="prj-card-imgfallback" aria-hidden="true">
+          {project.title.charAt(0)}
+        </span>
       </div>
-      <div className="project-info">
-        <h3>{project.title}</h3>
-        <div className="tech-tags">
+
+      <div className="prj-card-info">
+        <h3 className="prj-card-title">{project.title}</h3>
+
+        <div className="prj-card-tags">
           {project.tech.map((t) => (
-            <span key={t} className="tech-tag">{t}</span>
+            <span key={t} className="prj-card-tag">{t}</span>
           ))}
         </div>
-        <p>{project.description}</p>
-        <div className="project-links">
-          {project.liveLink && (
-            <a href={project.liveLink} target="_blank" rel="noreferrer" className="btn-link">
-              <FiExternalLink /> Live Demo
+
+        <p className="prj-card-desc">{project.description}</p>
+
+        <div className="prj-card-links">
+          {hasLive && (
+            <a
+              href={project.liveLink}
+              target="_blank"
+              rel="noreferrer"
+              className="prj-card-link prj-card-link--primary"
+            >
+              <FiExternalLink size={14} />
+              <span>Live Demo</span>
             </a>
           )}
-          {project.githubLink && (
-            <a href={project.githubLink} target="_blank" rel="noreferrer" className="btn-link">
-              <FiGithub /> GitHub
+
+          {hasCode && (
+            <a
+              href={project.githubLink}
+              target="_blank"
+              rel="noreferrer"
+              className="prj-card-link prj-card-link--ghost"
+            >
+              <FiGithub size={14} />
+              <span>GitHub</span>
             </a>
           )}
-          {project.details && (
-            <button className="btn-link btn-details">
-              <FiInfo /> Details
+
+          {hasDetails && (
+            <button
+              type="button"
+              className="prj-card-link prj-card-link--ghost prj-card-link--details"
+            >
+              <FiInfo size={14} />
+              <span>Details</span>
             </button>
+          )}
+
+          {!hasLive && !hasCode && !hasDetails && (
+            <span className="prj-card-link prj-card-link--muted">
+              Private / Coming soon
+            </span>
           )}
         </div>
       </div>
-    </div>
+
+      <span className="prj-card-glow" aria-hidden="true" />
+    </article>
   );
 };
 

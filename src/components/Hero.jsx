@@ -1,74 +1,336 @@
-import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
-import "./Hero.css";
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowDown,
+  ArrowUpRight,
+  Sparkles,
+  Code2,
+  Network,
+  Rocket,
+  Briefcase,
+  Monitor,
+  Globe,
+  Layers,
+  Mic,
+  GitBranch,
+} from "lucide-react";
 
 /* ─────────────────────────────────────────────
-   Animated background visual — glowing grid + nodes
+   Dynamic dot-web background
    ───────────────────────────────────────────── */
-function HeroVisual() {
-  const nodes = [
-    [15, 26], [34, 13], [55, 20], [79, 12], [91, 36],
-    [75, 48], [91, 70], [67, 84], [45, 72], [26, 88],
-    [9, 68],  [29, 51], [52, 45], [66, 64],
-  ];
-  const links = [
-    [0, 1], [0, 11], [1, 2], [1, 11], [2, 3], [2, 12],
-    [3, 4], [3, 5], [4, 5], [4, 6], [5, 12], [5, 13],
-    [6, 7], [6, 13], [7, 8], [7, 13], [8, 9], [8, 11],
-    [8, 12], [8, 13], [9, 10], [9, 11], [10, 0], [10, 11],
-    [11, 12], [12, 13],
-  ];
+function DotWeb() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    let width = 0, height = 0;
+    let dpr = window.devicePixelRatio || 1;
+    let dots = [];
+    let mouse = { x: -9999, y: -9999 };
+    let raf = 0;
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      dpr = window.devicePixelRatio || 1;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      initDots();
+    }
+
+    function initDots() {
+      const count = Math.max(60, Math.floor((width * height) / 9000));
+      dots = Array.from({ length: count }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.18,
+        vy: (Math.random() - 0.5) * 0.18,
+        r: Math.random() * 0.5 + 0.4,
+      }));
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, width, height);
+      const maxDist = Math.min(width, height) * 0.11;
+
+      for (let i = 0; i < dots.length; i++) {
+        const a = dots[i];
+        a.x += a.vx;
+        a.y += a.vy;
+        if (a.x < 0 || a.x > width) a.vx *= -1;
+        if (a.y < 0 || a.y > height) a.vy *= -1;
+
+        const dxm = a.x - mouse.x;
+        const dym = a.y - mouse.y;
+        const dm2 = dxm * dxm + dym * dym;
+        if (dm2 < 100 * 100) {
+          const f = (100 - Math.sqrt(dm2)) / 100;
+          a.x += (dxm / Math.sqrt(dm2 || 1)) * f * 0.5;
+          a.y += (dym / Math.sqrt(dm2 || 1)) * f * 0.5;
+        }
+
+        for (let j = i + 1; j < dots.length; j++) {
+          const b = dots[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < maxDist * maxDist) {
+            const alpha = 1 - Math.sqrt(d2) / maxDist;
+            ctx.strokeStyle = `rgba(96, 165, 250, ${alpha * 0.22})`;
+            ctx.lineWidth = 0.45;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+
+        const dmouse2 = dxm * dxm + dym * dym;
+        if (dmouse2 < 150 * 150) {
+          const alpha = 1 - Math.sqrt(dmouse2) / 150;
+          ctx.strokeStyle = `rgba(34, 211, 238, ${alpha * 0.4})`;
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.stroke();
+        }
+      }
+
+      for (const a of dots) {
+        ctx.fillStyle = "rgba(147, 197, 253, 0.75)";
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      raf = requestAnimationFrame(tick);
+    }
+
+    function onMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    }
+    function onLeave() {
+      mouse.x = -9999;
+      mouse.y = -9999;
+    }
+
+    resize();
+    window.addEventListener("resize", resize);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseleave", onLeave);
+
+    if (!prefersReduced) {
+      tick();
+    } else {
+      tick();
+      cancelAnimationFrame(raf);
+    }
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
+  return <canvas className="dot-web" ref={canvasRef} aria-hidden="true" />;
+}
+
+/* ─────────────────────────────────────────────
+   Typewriter Full Name
+   - types letter by letter
+   - stays visible 6 seconds
+   - deletes letter by letter
+   - pauses 1s, then loops
+   ───────────────────────────────────────────── */
+function TypewriterName() {
+  const FULL_NAME = "Sawira Manzoor";
+
+  const [displayText, setDisplayText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [charIndex, setCharIndex] = useState(0);
+
+  useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      setDisplayText(FULL_NAME);
+      return;
+    }
+
+    let timeout;
+
+    if (!isDeleting && charIndex < FULL_NAME.length) {
+      // Typing
+      timeout = setTimeout(() => {
+        setDisplayText(FULL_NAME.substring(0, charIndex + 1));
+        setCharIndex((i) => i + 1);
+      }, 120);                          // ← typing speed (slower = more dramatic)
+    } else if (!isDeleting && charIndex === FULL_NAME.length) {
+      // Name is fully typed — HOLD for 6 seconds
+      timeout = setTimeout(() => setIsDeleting(true), 15000);   // ← 6s hold
+    } else if (isDeleting && charIndex > 0) {
+      // Deleting
+      timeout = setTimeout(() => {
+        setDisplayText(FULL_NAME.substring(0, charIndex - 1));
+        setCharIndex((i) => i - 1);
+      }, 55);
+    } else if (isDeleting && charIndex === 0) {
+      // Fully erased — pause 1s before retyping
+      timeout = setTimeout(() => setIsDeleting(false), 1000);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting]);
+
+  const firstWordLength = "Sawira".length;
+  const part1 = displayText.slice(0, firstWordLength);
+  const part2 = displayText.slice(firstWordLength);
 
   return (
-    <div className="hero-visual-inner" aria-hidden="true">
-      {/* Soft glow behind everything */}
-      <div className="hv-glow" />
+    <h1 className="hero-name" aria-label="Sawira Manzoor">
+      <span aria-hidden="true">
+        <span className="name-plain">{part1}</span>
+        <span className="name-accent">{part2}</span>
+        <span className="type-cursor" />
+      </span>
+    </h1>
+  );
+}
 
-      {/* Rotating rings */}
-      <div className="hv-rings">
-        <i /><i /><i />
-      </div>
+/* ─────────────────────────────────────────────
+   Rotating Role Text
+   Cycles: Software Engineer → Full-Stack Developer → .NET Developer
+   Types → holds 2s → deletes → next
+   ───────────────────────────────────────────── */
+function RotatingRole() {
+  const ROLES = [
+    "Software Engineer",
+    "Full-Stack Developer",
+    ".NET Developer",
+  ];
 
-      {/* Node network */}
-      <svg className="hv-network" viewBox="0 0 100 100">
-        <defs>
-          <radialGradient id="hv-node">
-            <stop offset="0%" stopColor="#60a5fa" />
-            <stop offset="100%" stopColor="#22d3ee" />
-          </radialGradient>
-        </defs>
-        {links.map(([a, b], i) => (
-          <line
-            key={i}
-            x1={nodes[a][0]} y1={nodes[a][1]}
-            x2={nodes[b][0]} y2={nodes[b][1]}
-            style={{ animationDelay: `${i * -0.14}s` }}
-          />
-        ))}
-        {nodes.map(([x, y], i) => (
-          <circle
-            key={i}
-            cx={x} cy={y}
-            r={i === 12 ? 2.4 : 1}
-            style={{ animationDelay: `${i * -0.2}s` }}
-          />
-        ))}
-      </svg>
+  const [roleIndex, setRoleIndex] = useState(0);
+  const [displayText, setDisplayText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [charIndex, setCharIndex] = useState(0);
 
-      {/* Center monogram */}
-      <div className="hv-core">
-        <span>SM</span>
-        <small>DEV</small>
-      </div>
+  useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      setDisplayText(ROLES[0]);
+      return;
+    }
 
-      {/* Floating chips */}
-      <div className="hv-chip hv-chip-1">
-        <span className="dot" /> BUILD PASSING
+    let timeout;
+    const currentRole = ROLES[roleIndex];
+
+    if (!isDeleting && charIndex < currentRole.length) {
+      timeout = setTimeout(() => {
+        setDisplayText(currentRole.substring(0, charIndex + 1));
+        setCharIndex((i) => i + 1);
+      }, 65);
+    } else if (!isDeleting && charIndex === currentRole.length) {
+      // Hold for 2 seconds before deleting
+      timeout = setTimeout(() => setIsDeleting(true), 2000);
+    } else if (isDeleting && charIndex > 0) {
+      timeout = setTimeout(() => {
+        setDisplayText(currentRole.substring(0, charIndex - 1));
+        setCharIndex((i) => i - 1);
+      }, 35);
+    } else if (isDeleting && charIndex === 0) {
+      setIsDeleting(false);
+      setRoleIndex((i) => (i + 1) % ROLES.length);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting, roleIndex]);
+
+  return (
+    <p className="hero-role">
+      <Sparkles size={13} />
+      <span>{displayText}</span>
+      <span className="type-cursor small" />
+    </p>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Moving Marquee Ticker
+   Scrolling tags of what Sawira does
+   ───────────────────────────────────────────── */
+function Marquee() {
+  const TAGS = [
+    { icon: Code2,     label: "Web Development" },
+    { icon: Globe,     label: "Full-Stack Development" },
+    { icon: Monitor,   label: "Desktop Application Development" },
+    { icon: Mic,       label: "VoIP Software" },
+    { icon: Network,   label: "Networking & UDP" },
+    { icon: Layers,    label: "SaaS Platforms" },
+    { icon: Rocket,    label: "React Frontends" },
+    { icon: Code2,     label: "C# / .NET Systems" },
+    { icon: Briefcase, label: "REST API Integration" },
+    { icon: GitBranch, label: "Real-Time Communication" },
+  ];
+
+  // Duplicate the list so the marquee loops seamlessly
+  const loopTags = [...TAGS, ...TAGS];
+
+  return (
+    <div className="marquee" aria-label="Skills and technologies">
+      <div className="marquee-track">
+        {loopTags.map((tag, i) => {
+          const Icon = tag.icon;
+          return (
+            <span className="marquee-item" key={i}>
+              <Icon size={14} />
+              {tag.label}
+              <span className="marquee-dot">◆</span>
+            </span>
+          );
+        })}
       </div>
-      <div className="hv-chip hv-chip-2">
-        1.5+ YRS<br /><b>SHIPPING</b>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Right-side visual: code card
+   ───────────────────────────────────────────── */
+function CodeCard() {
+  return (
+    <div className="code-card" aria-hidden="true">
+      <div className="code-card-head">
+        <span className="dot red" />
+        <span className="dot yellow" />
+        <span className="dot green" />
+        <span className="file">~/sawira/portfolio.tsx</span>
       </div>
-      <div className="hv-chip hv-chip-3">
-        <Sparkles size={12} /> FULL-STACK
+      <pre className="code-body">
+{`const engineer = {
+  name: "Sawira Manzoor",
+  role: "Software Engineer",
+  stack: ["React", "C#", ".NET"],
+  focus: [
+    "Real-time systems",
+    "VoIP & networking",
+    "SaaS platforms",
+  ],
+  shipping: true,
+};`}
+      </pre>
+      <div className="code-card-foot">
+        <span><Code2 size={14} /> 12 files</span>
+        <span className="status"><i /> Live</span>
       </div>
     </div>
   );
@@ -80,29 +342,32 @@ function HeroVisual() {
 export default function Hero() {
   return (
     <section className="hero" id="home">
-      {/* Animated background grid */}
+      <DotWeb />
+
+      <div className="hero-glow-a" aria-hidden="true" />
+      <div className="hero-glow-b" aria-hidden="true" />
       <div className="hero-grid" aria-hidden="true" />
 
       <div className="hero-inner">
-        {/* LEFT — copy */}
+        {/* LEFT */}
         <div className="hero-copy">
           <div className="hero-badge">
-            <span className="dot" />
+            <span className="pulse-dot" />
             Available for opportunities
           </div>
 
-          <p className="hero-kicker">Software Engineer · Pakistan</p>
+          <p className="hero-kicker">
+            <Sparkles size={12} /> Based in Pakistan · Available worldwide
+          </p>
 
-          <h1 className="hero-title">
-            Building <em>software</em>
-            <br />
-            that <span>ships</span> to production.
-          </h1>
+          <TypewriterName />
 
-          <p className="hero-lede">
-            I'm <strong>Sawira Manzoor</strong> — a software engineer crafting
-            React frontends, C#/.NET systems, and real-time networking
-            applications that turn complex problems into reliable products.
+          <RotatingRole />
+
+          <p className="hero-tagline">
+            I build <em>software</em> that ships to production —
+            <strong> React frontends</strong>, <strong>C#/.NET systems</strong>, and
+            <strong> real-time networking</strong> applications.
           </p>
 
           <div className="hero-cta">
@@ -114,19 +379,48 @@ export default function Hero() {
             </a>
           </div>
 
-          <div className="hero-meta">
-            <div><strong>1.5+</strong><span>YEARS<br />EXPERIENCE</span></div>
-            <div><strong>∞</strong><span>CURIOSITY<br />BY DEFAULT</span></div>
+          <div className="hero-stats">
+            <div className="stat">
+              <strong>6+</strong>
+              <span>PROJECTS<br />SHIPPED</span>
+            </div>
+            <div className="stat-divider" />
+            <div className="stat">
+              <strong>1.5+</strong>
+              <span>YEARS<br />EXPERIENCE</span>
+            </div>
+            <div className="stat-divider" />
+            <div className="stat">
+              <strong>8+</strong>
+              <span>TECH<br />STACK</span>
+            </div>
+            <div className="stat-divider" />
+            <div className="stat">
+              <strong>∞</strong>
+              <span>CURIOSITY<br />BY DEFAULT</span>
+            </div>
           </div>
         </div>
 
-        {/* RIGHT — visual */}
+        {/* RIGHT */}
         <div className="hero-visual">
-          <HeroVisual />
+          <div className="hv-glow" aria-hidden="true" />
+          <CodeCard />
+          <div className="hv-chip hv-chip-1">
+            <span className="pulse-dot" /> BUILD PASSING
+          </div>
+          <div className="hv-chip hv-chip-2">
+            1.5+ YRS<br /><b>SHIPPING</b>
+          </div>
+          <div className="hv-chip hv-chip-3">
+            <Sparkles size={12} /> FULL-STACK
+          </div>
         </div>
       </div>
 
-      {/* Bottom scroll cue */}
+      {/* MOVING MARQUEE — full width at the bottom of the hero */}
+      <Marquee />
+
       <div className="hero-scroll">
         <span>SCROLL</span>
         <i />
