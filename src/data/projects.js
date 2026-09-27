@@ -1,3 +1,5 @@
+const BASE = import.meta.env.BASE_URL;
+
 const projects = [
   {
     id: 1,
@@ -6,7 +8,7 @@ const projects = [
       "A modern, responsive company website built with React and Bootstrap, showcasing services, portfolio, and contact.",
     tech: ["React", "Bootstrap"],
     category: ["React", "Frontend"],
-    image: "/images/projects/company-website.png",
+    image: `${BASE}images/projects/company-website.png`,
     liveLink: "https://siprafusion.com/",
     githubLink: "https://github.com/sawira-dev",
     featured: false,
@@ -18,7 +20,7 @@ const projects = [
       "A training institute landing page with course listings, instructor profiles, and enrollment forms.",
     tech: ["React", "CSS3"],
     category: ["React", "Frontend"],
-    image: "/images/projects/training-react.png",
+    image: `${BASE}images/projects/training-react.png`,
     liveLink: "https://sipraedu.sipracorporation.com/",
     githubLink: "https://github.com/sawira-dev",
     featured: false,
@@ -30,12 +32,11 @@ const projects = [
       "A corporate website for a business firm, featuring modern UI/UX, smooth animations, and contact integration.",
     tech: ["React", "JavaScript"],
     category: ["React", "Frontend"],
-    image: "/images/projects/corporation-react.png",
+    image: `${BASE}images/projects/corporation-react.png`,
     liveLink: "https://sipracorporation.com/",
     githubLink: "https://github.com/sawira-dev",
     featured: false,
   },
-  
   {
     id: 4,
     title: "Mails Portal",
@@ -43,19 +44,19 @@ const projects = [
       "A full-stack mail management application allowing users to send, receive, and organize emails.",
     tech: ["React", "Firebase"],
     category: ["React", "Full-Stack"],
-    image: "/images/projects/mail-portal.png",
+    image: `${BASE}images/projects/mail-portal.png`,
     liveLink: "#",
     githubLink: "https://github.com/sawira-dev",
     featured: false,
   },
   {
-    id:5,
+    id: 5,
     title: "School Management System",
     description:
       "A comprehensive .NET-based ERP with portals for admin, teacher, and student, including attendance, fees, and reports.",
     tech: [".NET", "SQL", "React"],
     category: [".NET", "Full-Stack", "Enterprise"],
-    image: "/images/projects/school-system.png",
+    image: `${BASE}images/projects/school-system.png`,
     liveLink: "https://demo-sfschool.sipracorporation.com/",
     githubLink: "https://github.com/sawira-dev",
     featured: true,
@@ -67,24 +68,23 @@ const projects = [
       "A modern, responsive landing page for the multi-tenant school management platform — feature highlights, modules overview, and inquiry sections.",
     tech: ["JavaScript", "Bootstrap", "CSS3"],
     category: ["Frontend"],
-    image: "/images/projects/sfschool-landing.png",
+    image: `${BASE}images/projects/sfschool-landing.png`,
     liveLink: "https://sfschool.sipracorporation.com/",
     githubLink: "https://github.com/sawira-dev",
     featured: false,
   },
-   {
+  {
     id: 7,
     title: "Cave School Landing Page",
     description:
       "A modern, responsive landing page for the cave school management platform — feature highlights, modules overview, and inquiry sections.",
     tech: ["JavaScript", "Bootstrap", "CSS3"],
     category: ["Frontend"],
-    image: "/images/projects/cave-school-landing.png",
+    image: `${BASE}images/projects/cave-school-landing.png`,
     liveLink: "https://cave-sfschool.sipracorporation.com/",
     githubLink: "https://github.com/sawira-dev",
     featured: false,
   },
-
   {
     id: 8,
     title: "Student Assignment Portal",
@@ -92,7 +92,7 @@ const projects = [
       "A web portal for managing student assignments — submission, tracking, grading, and deadline reminders for teachers and students.",
     tech: ["React", "Firebase", "JavaScript"],
     category: ["React", "Full-Stack", "Enterprise"],
-    image: "/images/projects/student-assignment-portal.png",
+    image: `${BASE}images/projects/student-assignment-portal.png`,
     liveLink: "https://studentprojectsubmission-fab3b.web.app/",
     githubLink: "https://github.com/sawira-dev",
     featured: false,
@@ -104,7 +104,7 @@ const projects = [
       "A real-time LAN-based Voice over IP desktop application featuring UDP streaming, noise suppression, echo cancellation, jitter buffering, and audio compression.",
     tech: [".NET", "UDP", "Audio Streaming"],
     category: [".NET", "Desktop", "Networking"],
-    image: "/images/projects/voip-system.png",
+    image: `${BASE}images/projects/voip-system.png`,
     liveLink: "#",
     githubLink: "https://github.com/sawira-dev",
     featured: true,

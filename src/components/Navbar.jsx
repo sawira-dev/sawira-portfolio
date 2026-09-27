@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X, Download } from "lucide-react";
+const BASE = import.meta.env.BASE_URL;
 
 const NAV_LINKS = [
   { label: "Home",       href: "#home",       num: "01" },
@@ -112,8 +113,8 @@ export default function Navbar() {
 
             {/* Desktop résumé button */}
             <a
-              href="/resume.pdf"
-              download
+href={`${BASE}resume.pdf`}        
+      download
               className="nav-cta"
               onClick={closeMenu}
             >
